@@ -6,12 +6,20 @@
 #include<sys/wait.h>
 #include<readline/readline.h>
 #include<readline/history.h>
+#include <signal.h>
 
 #define MAXCOM 1000 // max number of letters to be supported
 #define MAXLIST 100 // max number of commands to be supported
 
 // Clearing the shell using escape sequences
 #define clear() printf("\033[H\033[J")
+
+void sig_handler() {
+    char dir[1024];
+    getcwd(dir , sizeof(dir));
+    printf("\nDir: %s \n", dir);
+    printf(">> ");
+}
 
 int countLines(char* dir) {
     FILE *fileptr;
@@ -139,7 +147,7 @@ int readFirstWord(char* dir) {
 }
 
 int ownComandHandler(char** parsedInput) {
-    int numberOfComands = 5;
+    int numberOfComands = 6;
     int sw = -1;
     char* listOfComands[numberOfComands];
     char* name;
@@ -149,6 +157,7 @@ int ownComandHandler(char** parsedInput) {
     listOfComands[2] = "mrw";
     listOfComands[3] = "rw";
     listOfComands[4] = "cl";
+    listOfComands[5] = "exitt";
 
     for (int i=0; i < numberOfComands; i++) {
         if (strcmp(parsedInput[0], listOfComands[i]) == 0) {
@@ -159,38 +168,43 @@ int ownComandHandler(char** parsedInput) {
 
     pid_t pid = fork();
     if (pid == 0) {
+        int cd = 0;
         //printf("mamade %d \n", sw);
         switch (sw) {
             case 0:
                 chdir(parsedInput[1]);
-                return 1;
+                exit(3);
             case 1:
                 readFirstWord(parsedInput[1]);
-                return 1;
+                exit(1);
             case 2:
                 //how to code in samurai way
                 printf("Most repeated word is: \n");
                 printf("\033[A\33[2K\r");
                 mostRepeat(parsedInput[1]);
-                return 1;
+                exit(1);
             case 3:
                 removeWithespace(parsedInput[1]);
-                return 1;
+                exit(1);
             case 4:
                 countLines(parsedInput[1]);
-                return 1;
+                exit(1);
+            case 5:
+                exit(4);
             default:
                 break;
         }
-        return 0;
+        exit(0);
     } else {
         int state;
         waitpid(pid, &state, 0);
         int rtrn = WEXITSTATUS(state);
-        //printf("%d \n", rtrn);
-        // if (rtrn == 2) {
-        //     exit(0);
-        // }
+        if (rtrn == 3) {
+            chdir(parsedInput[1]);
+        }
+        if  (rtrn == 4) {
+            exit(0);
+        }
         return rtrn;
     }
 }
@@ -266,6 +280,7 @@ int main() {
     char *parsedInput[MAXCOM];
     int sw = 0;
     Start();
+    signal(SIGINT, sig_handler);
     while (1) {
 
         printDir();
