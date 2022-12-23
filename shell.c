@@ -13,13 +13,11 @@
 // Clearing the shell using escape sequences
 #define clear() printf("\033[H\033[J")
 
-int countLines() {
+int countLines(char* dir) {
     FILE *fileptr;
     int count_lines = 0;
     char filechar[40], chr;
-    // printf("Enter file name: ");
-    // scanf("%s", filechar);
-    fileptr = fopen("input.txtx", "r");
+    fileptr = fopen(dir, "r");
     if (fileptr == NULL) {
         printf("File not found \n");
         return 0;
