@@ -14,6 +14,52 @@
 // Clearing the shell using escape sequences
 #define clear() printf("\033[H\033[J")
 
+int printFirstTenLines(char* dir) {
+    FILE *myfile;
+    char content;
+    int max = 0;
+
+    // Open file
+    myfile = fopen(dir, "r");
+    if (myfile  == NULL){
+        printf("File not found \n");
+        return 0;
+    }
+    // Read the first 10 lines from file
+    content  = fgetc(myfile);
+    while (content != EOF){
+        if (content == '\n') max++;
+        if (max > 9)
+            break;
+        printf ("%c", content);
+        content = fgetc(myfile);
+    }
+ 
+    fclose(myfile);
+    return 0;
+}
+
+int comentRemover(char* dir) {
+    FILE* fp;
+    fp = fopen(dir, "r");
+    if (fp == NULL) {
+        printf("File not found \n");
+        return 0;
+    }
+
+    int ch;
+    while ((ch = getc(fp)) != EOF) {
+        if (ch == '#') {
+            while (ch != '\n') {
+            ch = getc(fp);
+            }
+        printf("\n");
+        } else {
+            printf("%c", ch);
+        }
+    }
+}
+
 void sig_handler() {
     char dir[1024];
     getcwd(dir , sizeof(dir));
@@ -147,7 +193,7 @@ int readFirstWord(char* dir) {
 }
 
 int ownComandHandler(char** parsedInput) {
-    int numberOfComands = 6;
+    int numberOfComands = 8;
     int sw = -1;
     char* listOfComands[numberOfComands];
     char* name;
@@ -157,7 +203,9 @@ int ownComandHandler(char** parsedInput) {
     listOfComands[2] = "mrw";
     listOfComands[3] = "rw";
     listOfComands[4] = "cl";
-    listOfComands[5] = "exitt";
+    listOfComands[5] = "cmr";
+    listOfComands[6] = "ftl";
+    listOfComands[7] = "exitt";
 
     for (int i=0; i < numberOfComands; i++) {
         if (strcmp(parsedInput[0], listOfComands[i]) == 0) {
@@ -190,6 +238,12 @@ int ownComandHandler(char** parsedInput) {
                 countLines(parsedInput[1]);
                 exit(1);
             case 5:
+                comentRemover(parsedInput[1]);
+                exit(1);
+            case 6:
+                printFirstTenLines(parsedInput[1]);
+                exit(1);
+            case 7:
                 exit(4);
             default:
                 break;
