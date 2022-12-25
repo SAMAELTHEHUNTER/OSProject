@@ -220,7 +220,7 @@ int ownComandHandler(char** parsedInput) {
         //printf("mamade %d \n", sw);
         switch (sw) {
             case 0:
-                chdir(parsedInput[1]);
+                //chdir(parsedInput[1]);
                 exit(3);
             case 1:
                 readFirstWord(parsedInput[1]);
