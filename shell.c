@@ -11,9 +11,6 @@
 #define MAXCOM 1000 // max number of letters to be supported
 #define MAXLIST 100 // max number of commands to be supported
 
-// Clearing the shell using escape sequences
-#define clear() printf("\033[H\033[J")
-
 int printFirstTenLines(char* dir) {
     FILE *myfile;
     char content;
@@ -60,12 +57,7 @@ int comentRemover(char* dir) {
     }
 }
 
-void sig_handler() {
-    char dir[1024];
-    getcwd(dir , sizeof(dir));
-    printf("\nDir: %s \n", dir);
-    printf(">> ");
-}
+
 
 int countLines(char* dir) {
     FILE *fileptr;
@@ -129,7 +121,7 @@ int mostRepeat(char* dir) {
     if (file == NULL){
         printf("File not found \n");
         return 0;
-    }  
+    }
     //Since, C doesn't provide in-built function, 
     //following code will split content of file into words
     while ((read = getline(&line, &len, file)) != -1) {  
@@ -153,7 +145,7 @@ int mostRepeat(char* dir) {
         count = 1;
         //Count each word in the file and store it in variable count
         for(j = i+1; j < length; j++){
-            if(strcmp(words[i], words[j]) == 0 && (strcmp(words[i]," ") != 0)){
+            if(strcmp(words[i], words[j]) == 0 && (strcmp(words[i]," ") != 0) && (strcmp(words[i], "\0") != 0)){
                 count++;
             } 
         }
@@ -182,7 +174,8 @@ int readFirstWord(char* dir) {
         int count = 0;
         while (!feof(fp)) {
             count++;
-            fscanf(fp,"%s%*[^\n]",word);;
+            fscanf(fp,"%s%*[^\n]",word);
+            if (strcmp(word, "") != 0)
             printf("word read %d is: %s\n", count, word);
             strcpy(word,"");
         }
@@ -309,7 +302,15 @@ int takeInput(char* input) {
 
     buffer = readline(">> ");
     if (strlen(buffer) > 0) {
+        FILE *fp;
+        fp = fopen("LOG.txt", "w");
+        //printf("%s ", buffer);
+
+        fprintf(fp,"%s\n", buffer);
+        //fclose(fp);
+        add_history(buffer);
         strcpy(input , buffer);
+        
         return 0;
     } else {
         return 1;
@@ -322,19 +323,10 @@ void printDir() {
     printf("\nDir: %s \n", dir);
 }
 
-void Start() {
-    //clear();
-    printf("\t*****starting shell*****\n");
-    char *userName = getenv("USER");
-    printf ("user is: %s \n" , userName);
-}
-
-int main() {
+void startingShell() {
     char input[MAXCOM];
     char *parsedInput[MAXCOM];
     int sw = 0;
-    Start();
-    signal(SIGINT, sig_handler);
     while (1) {
 
         printDir();
@@ -353,5 +345,21 @@ int main() {
             implementation(parsedInput);
         }
     }
+}
+
+void Start() {
+    printf("\t*****starting shell*****\n");
+    char *userName = getenv("USER");
+    printf ("user is: %s \n" , userName);
+}
+
+void sig_handler() {
+    startingShell();
+}
+
+int main() {
+    Start();
+    signal(SIGINT, sig_handler);
+    startingShell();
     return 0;
 }
