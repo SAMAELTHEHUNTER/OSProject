@@ -7,22 +7,23 @@
 #include<readline/readline.h>
 #include<readline/history.h>
 #include <signal.h>
+#include <setjmp.h>
+#include <unistd.h>
 
-#define MAXCOM 1000 // max number of letters to be supported
-#define MAXLIST 100 // max number of commands to be supported
+#define maxcomands 1000 
+#define maxlists 100 
+
+sigjmp_buf ctrlc_buf;
 
 int printFirstTenLines(char* dir) {
     FILE *myfile;
     char content;
     int max = 0;
-
-    // Open file
     myfile = fopen(dir, "r");
     if (myfile  == NULL){
         printf("File not found \n");
         return 0;
     }
-    // Read the first 10 lines from file
     content  = fgetc(myfile);
     while (content != EOF){
         if (content == '\n') max++;
@@ -68,19 +69,14 @@ int countLines(char* dir) {
         printf("File not found \n");
         return 0;
     }
-   //extract character from file and store in chr
     chr = getc(fileptr);
-    while (chr != EOF)
-    {
-        //Count whenever new line is encountered
-        if (chr == '\n')
-        {
+    while (chr != EOF) {
+        if (chr == '\n') {
             count_lines = count_lines + 1;
         }
-        //take next character from file.
         chr = getc(fileptr);
     }
-    fclose(fileptr); //close file.
+    fclose(fileptr);
     printf("There are %d lines in this file\n", count_lines+1);
     return 1;
 }
@@ -109,48 +105,37 @@ int removeWithespace(char* dir) {
 }
 
 int mostRepeat(char* dir) {
-    //printf("eyjan");
     FILE *file;
     char ch, *line;
     size_t len = 0, read;
-    char words[MAXCOM][MAXCOM], word[MAXLIST];
+    char words[maxcomands][maxcomands], word[maxlists];
     int i = 0, j, k, maxCount = 0, count; 
-    //Opens file in read mode
     file = fopen(dir, "r");
-    //If file doesn't exist
     if (file == NULL){
         printf("File not found \n");
         return 0;
     }
-    //Since, C doesn't provide in-built function, 
-    //following code will split content of file into words
     while ((read = getline(&line, &len, file)) != -1) {  
         for(k=0; line[k]!='\0'; k++){
-            //Here, i represents row and j represents column of two-dimensional array words 
             if(line[k] != ' ' && line[k] != '\n' && line[k] != ',' && line[k] != '.' ){
                 words[i][j++] = tolower(line[k]);
             }
             else{
                 words[i][j] = '\0';
-                //Increment row count to store new word
                 i++;
-                //Set column count to 0
                 j = 0;
             }
         }
     }
     int length = i;
-    //Determine the most repeated word in a file
     for(i = 0; i < length; i++){
         count = 1;
-        //Count each word in the file and store it in variable count
         for(j = i+1; j < length; j++){
             if(strcmp(words[i], words[j]) == 0 && (strcmp(words[i]," ") != 0) && (strcmp(words[i], "\0") != 0)){
                 count++;
             } 
         }
-        //If maxCount is less than count then store value of count in maxCount 
-        //and corresponding word to variable word
+
         if(count > maxCount){
             maxCount = count;
             strcpy(word, words[i]);
@@ -165,7 +150,7 @@ int mostRepeat(char* dir) {
 
 int readFirstWord(char* dir) {
     FILE *fp;
-    char word[MAXCOM];
+    char word[maxcomands];
     fp = fopen(dir, "r");
     if (fp == NULL) {
         printf("cant find the file!\n");
@@ -207,12 +192,14 @@ int ownComandHandler(char** parsedInput) {
         }
     }
 
+    // printf("before fork\n");
+
     pid_t pid = fork();
     if (pid == 0) {
-        int cd = 0;
-        //printf("mamade %d \n", sw);
+        // printf("mamade %d \n", sw);
         switch (sw) {
             case 0:
+                // printf("sw\n");
                 //chdir(parsedInput[1]);
                 exit(3);
             case 1:
@@ -247,7 +234,18 @@ int ownComandHandler(char** parsedInput) {
         waitpid(pid, &state, 0);
         int rtrn = WEXITSTATUS(state);
         if (rtrn == 3) {
-            chdir(parsedInput[1]);
+            // printf("parent");
+            // printf("out jalil\n");
+            if (strcmp(parsedInput[1], "~") == 0 ) {
+                parsedInput[1] = "/home/jalil";
+                // printf("mamad %s jalil\n", parsedInput[1]);
+                chdir(parsedInput[1]);
+            } else {
+                // printf("brother\n");
+                if (strcmp(parsedInput[1], "/home") != 0) {
+                    chdir(parsedInput[1]);
+                }
+            }
         }
         if  (rtrn == 4) {
             exit(0);
@@ -274,7 +272,7 @@ void implementation(char** parsedInput) {
 }
 
 void parseSpace(char* input, char** parsed) {
-    for (int i=0; i<MAXLIST; i++) {
+    for (int i=0; i< maxlists; i++) {
         parsed[i] = strsep(&input, " ");
 
         if (parsed[i] == NULL) {
@@ -306,9 +304,10 @@ int takeInput(char* input) {
         fp = fopen("LOG.txt", "w");
         //printf("%s ", buffer);
 
-        fprintf(fp,"%s\n", buffer);
+        // fprintf(fp,"%s\n", buffer);
         //fclose(fp);
         add_history(buffer);
+        write_history("/home/jalil/Documents/GitHub/OSProject/LOG.txt");
         strcpy(input , buffer);
         
         return 0;
@@ -323,11 +322,19 @@ void printDir() {
     printf("\nDir: %s \n", dir);
 }
 
+void sig_handler() {
+    // startingShell();
+    siglongjmp(ctrlc_buf, 1);
+}
+
+
 void startingShell() {
-    char input[MAXCOM];
-    char *parsedInput[MAXCOM];
+    char input[maxcomands];
+    char *parsedInput[maxcomands];
     int sw = 0;
+    signal(SIGINT, sig_handler);
     while (1) {
+        while(sigsetjmp(ctrlc_buf, 1) != 0);
 
         printDir();
 
@@ -353,13 +360,12 @@ void Start() {
     printf ("user is: %s \n" , userName);
 }
 
-void sig_handler() {
-    startingShell();
-}
+
+
 
 int main() {
     Start();
-    signal(SIGINT, sig_handler);
+    read_history("/home/jalil/Documents/GitHub/OSProject/LOG.txt");
     startingShell();
     return 0;
 }
