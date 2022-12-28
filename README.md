@@ -8,32 +8,32 @@ simple linux shell in c with custom comands
 command in shell : rfw
 returns first word of each input text file
 
-#mostRepeat()
+## mostRepeat()
 
 command in shell : mrw
 finds and returns most repeated word in input text file
 
-#removeWhiteSpace()
+## removeWhiteSpace()
 
 command in shell : rw
 removes all whitespace from input text file
 
-#countLineds()
+## countLineds()
 
 command in shell : cl
 returns the count of the lines in input text file
 
-#commentRemover()
+## commentRemover()
 
 command in shell : cmr
 removes all commented lines from input text file
 
-#printFirstTenLines() 
+## printFirstTenLines() 
 
 command in shell : ftl
 returns the first 10 lines in input text file
 
-#exit() (pre-existing)
+## exit() (pre-existing)
 
 command in shell : exitt
 terminates shell
