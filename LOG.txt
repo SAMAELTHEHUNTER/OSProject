@@ -3,3 +3,22 @@ ls
 cat test.txt
 exitt
 exitt
+exitt
+cd /home/jalil
+cd Documents/
+cd GitHub/
+cd OSProject/
+exitt
+cd /home/jalil
+ls
+cd Documents/
+cd GitHub/
+cd OSProject/
+rfw test.txt
+mrw test.txtx
+mrw test.txt
+rw test.txt
+cl test.txt
+cmr test.txt
+ftl test.txt
+exitt
