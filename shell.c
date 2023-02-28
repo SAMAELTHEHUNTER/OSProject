@@ -117,7 +117,7 @@ int mostRepeat(char* dir) {
     }
     while ((read = getline(&line, &len, file)) != -1) {  
         for(k=0; line[k]!='\0'; k++){
-            if(line[k] != ' ' && line[k] != '\n' && line[k] != ',' && line[k] != '.' ){
+            if(line[k] != ' ' && line[k] != '\n' && line[k] != ',' ){
                 words[i][j++] = tolower(line[k]);
             }
             else{
@@ -262,7 +262,7 @@ void implementation(char** parsedInput) {
         return;
     } else if (pid == 0) {
         if (execvp(parsedInput[0], parsedInput) < 0) {
-            printf ("Could not run that shit. :( \n");
+            printf ("Could not run that. :( \n");
         }
         exit(0);
     } else {

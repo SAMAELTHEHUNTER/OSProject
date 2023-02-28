@@ -22,3 +22,33 @@ cl test.txt
 cmr test.txt
 ftl test.txt
 exitt
+cd --
+cd .
+cd ~
+cd 
+cd ~
+ls
+cd  Documents/
+cd
+cd ..
+rfw test.txt
+cd OSProject/
+rfw test.txt
+mrw test.txt
+exit
+exitt
+exitt
+exitt
+cd ..
+exitt
+ls
+ls /l
+-ls -l
+ls -l
+pwd
+cd ..
+exitt
+rfw case1.txt
+mrw case1.txt
+cmr case2.txt
+exitt
