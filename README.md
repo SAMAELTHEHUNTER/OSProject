@@ -3,7 +3,7 @@ simple linux shell in c with custom comands
 
 # list of custom comands
 
-#readFirstWord()
+## readFirstWord()
 
 command in shell : rfw
 returns first word of each input text file
